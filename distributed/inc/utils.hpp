@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <json.hpp>
+#include <wiringPi.h>
 
 using namespace std;
 struct component
@@ -18,5 +19,5 @@ struct component
 vector<component> loadOutputAsArr();
 
 int getWPiMappedPin(int gpioPin);
-
+void people_counter(int increment_pin, int decrement_pin, void (*increment_function)(), void (*decrement_function)());
 #endif

@@ -22,6 +22,11 @@ vector<component> loadOutputAsArr(){
   return tempArr;
 }
 
+void people_counter(int increment_pin, int decrement_pin, void (*increment_function)(), void (*decrement_function)()){
+  wiringPiISR (increment_pin, INT_EDGE_RISING, increment_function);
+  wiringPiISR (decrement_pin, INT_EDGE_RISING, decrement_function);
+}
+
 int getWPiMappedPin(int gpioPin){
   switch (gpioPin)
   {
