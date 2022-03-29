@@ -24,19 +24,13 @@ int main(){
   outputs = loadOutputAsArr();
   wiringPiSetup();
 
-  // for(auto elem : outputs){
-  //   pinMode(elem.wpi_gpio, OUTPUT);
-  //   digitalWrite(elem.wpi_gpio, LOW);
-  // }
-  thread people_observer(init_people_counter, getWPiMappedPin(13), getWPiMappedPin(19));
+  init_people_counter(getWPiMappedPin(13), getWPiMappedPin(19));
 
   while (is_running)
   {
     cout << "Pessoas:" << number_on_floor << endl;
     usleep(1000000);
   }
-  
-  people_observer.join();
 
   return 0;
 }
