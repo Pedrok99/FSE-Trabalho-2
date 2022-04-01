@@ -12,6 +12,9 @@ void initWiringpi(){
 
 int getPinData(int pin){
   int pinState = digitalRead(pin);
-  delay(200);
   return pinState;
+}
+
+void setPinValue(int pin, int value){
+  digitalWrite(pin, value);
 }
