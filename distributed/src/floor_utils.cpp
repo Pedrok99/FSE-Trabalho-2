@@ -1,60 +1,22 @@
 #include <floor_utils.hpp>
 #include <utils.hpp>
 
-vector<component> loadResource(string targetResource, bool debug){
-  vector <component> tempArr;
-  component tempComponent;
-  nlohmann::json jsonCfg;
-
-  ifstream jsonBuffer("groundCfg.json", ifstream::binary);
-  jsonBuffer >> jsonCfg;
-  for (auto& element : jsonCfg[targetResource]) {
-    tempComponent.type = element["type"];
-    tempComponent.tag = element["tag"];
-    tempComponent.wpi_gpio = getWPiMappedPin(element["gpio"]);
-    tempArr.push_back(tempComponent);
-  }
-  // debug
-  if(debug){
-    for (auto prop = tempArr.begin(); prop != tempArr.end(); ++prop){
-      cout << prop->type << " ";
-      cout << prop->tag << " ";
-      cout << prop->wpi_gpio << "\n\n";
-   }
-  }
-  
-  return tempArr;
-}
-
 JsonFloor::JsonFloor(std::string jsonFileName){
-  vector <component> tempArr;
-  component tempComponent;
 
-  try
-  {
+  try{
     ifstream jsonBuffer(jsonFileName, ifstream::binary);
     jsonBuffer >> loadedJson;
-  }
-  catch(const std::exception& e)
-  {
+  }catch(const std::exception& e){
     std::cerr << e.what() << '\n';
   }
 
-  for (auto& element : loadedJson["outputs"]) {
-    tempComponent.type = element["type"];
-    tempComponent.tag = element["tag"];
-    tempComponent.wpi_gpio = getWPiMappedPin(element["gpio"]);
-    tempArr.push_back(tempComponent);
-  }
-  // debug
-  
-    for (auto prop = tempArr.begin(); prop != tempArr.end(); ++prop){
-      cout << prop->type << " ";
-      cout << prop->tag << " ";
-      cout << prop->wpi_gpio << "\n\n";
-   }
-  
-  outputsComponents = tempArr;
+  inputsComponents = loadResource("inputs");
+
+  outputsComponents = loadResource("outputs");
+
+  floorName = loadedJson["nome"];
+
+  temperatureSensor = loadResource("sensor_temperatura")[0];
 
 };
 
@@ -66,6 +28,52 @@ std::vector<component> JsonFloor::getInputsComponents(){
   return inputsComponents;
 }
 
+component JsonFloor::getTemperatureSensorComponent(){
+  return temperatureSensor;
+}
+
+std::vector<component> JsonFloor::loadResource(std::string targetKey){
+  vector <component> auxVector;
+  component auxComponent;
+
+  for (auto& element : loadedJson[targetKey]) {
+    auxComponent.type = element["type"];
+    auxComponent.tag = element["tag"];
+    auxComponent.gpio = element["gpio"];
+    auxComponent.wpi_gpio = getWPiMappedPin(element["gpio"]);
+    auxVector.push_back(auxComponent);
+  }
+  return auxVector;
+}
+
+std::string JsonFloor::getFloorName(){
+  return floorName;
+}
+
+void JsonFloor::debug(){
+  cout <<  "=========================================" << endl;
+  // debug outputs --------------------------------------------------------------------------------
+  cout << "[DEBUG] Loaded Output Components:"<< "\n\n";
+  for (auto prop = outputsComponents.begin(); prop != outputsComponents.end(); ++prop){
+    cout << prop->type << " ";
+    cout << prop->tag << " ";
+    cout << prop->gpio << " ";
+    cout << prop->wpi_gpio << "\n\n";
+  }
+  // end debug ------------------------------------------------------------------------------------
+  cout <<  "=========================================" << endl;
+
+  // debug inputs ---------------------------------------------------------------------------------
+  cout << "[DEBUG] Loaded Input Components:"<< "\n\n";
+  for (auto prop = inputsComponents.begin(); prop != inputsComponents.end(); ++prop){
+    cout << prop->type << " ";
+    cout << prop->tag << " ";
+    cout << prop->gpio << " ";
+    cout << prop->wpi_gpio << "\n\n";
+  }
+  // end debug ------------------------------------------------------------------------------------
+  cout <<  "=========================================" << endl;
+}
 JsonFloor::~JsonFloor(){
   cout<< "Adeus :(" << endl;
 }

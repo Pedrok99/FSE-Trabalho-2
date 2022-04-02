@@ -13,25 +13,27 @@ struct component
 {
   string type;
   string tag;
+  int gpio;
   int wpi_gpio;
 };
 
 class JsonFloor{
   private:
     nlohmann::json loadedJson;
+    std::string floorName;
     std::vector<component> outputsComponents;
     std::vector<component> inputsComponents;
-    component dht22Component;
+    component temperatureSensor;
+    std::vector<component> loadResource(std::string targetKey);
 
   public:
     JsonFloor(std::string jsonFileName);
     std::vector<component> getOutputsComponents();
     std::vector<component> getInputsComponents();
-    component getDht22Component();
+    component getTemperatureSensorComponent();
+    std::string getFloorName();
+    void debug();
     ~JsonFloor();
 };
-
-vector<component> loadResource(string targetResource, bool debug = false); 
-string getFloorName();
 
 #endif
