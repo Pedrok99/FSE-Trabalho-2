@@ -30,7 +30,7 @@ class Server():
     if not message:
       print('No message recieved')
       return False
-    return message.decode()
+    return message.decode(encoding='utf_8', errors='replace')
 
   # def __receive_value(self, conn, buf_lentgh):
   #   buf = b''
