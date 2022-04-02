@@ -3,8 +3,8 @@
 
 struct dht22
 {
-  float humidity;
-  float temperature;
+  float humidity = 0;
+  float temperature = 0;
 };
 
 dht22 read_dht_data(int DHT_PIN);

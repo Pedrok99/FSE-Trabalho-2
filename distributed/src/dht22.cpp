@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <dht22.hpp>
+#include <math.h>
 
 #define MAX_TIMINGS	85
 // #define DHT_PIN		3	/* GPIO-22 */
@@ -87,5 +88,7 @@ dht22 readSafeTemperature(int pin, dht22 lastValidResult){
   if(currentResult.humidity == float(-1) && currentResult.temperature == float(-1)){
     return lastValidResult;
   }
+	currentResult.humidity = round(currentResult.humidity * 100.0)/100.0;
+	currentResult.temperature = round(currentResult.temperature * 100.0)/100.0;
   return currentResult;
 }
