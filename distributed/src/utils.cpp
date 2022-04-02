@@ -1,27 +1,5 @@
 #include <utils.hpp>
 
-vector<component> loadOutputAsArr(){
-  vector <component> tempArr;
-  component tempComponent;
-  nlohmann::json jsonCfg;
-
-  ifstream jsonBuffer("groundCfg.json", ifstream::binary);
-  jsonBuffer >> jsonCfg;
-  for (auto& element : jsonCfg["outputs"]) {
-    tempComponent.type = element["type"];
-    tempComponent.tag = element["tag"];
-    tempComponent.wpi_gpio = getWPiMappedPin(element["gpio"]);
-    tempArr.push_back(tempComponent);
-  }
-  //  for (auto prop = tempArr.begin(); prop != tempArr.end(); ++prop){
-  //       cout << prop->type << " ";
-  //       cout << prop->tag << " ";
-  //       cout << prop->wpi_gpio << "\n";
-
-  //  }
-  return tempArr;
-}
-
 void people_counter(int increment_pin, int decrement_pin, void (*increment_function)(), void (*decrement_function)()){
   wiringPiISR (increment_pin, INT_EDGE_RISING, increment_function);
   wiringPiISR (decrement_pin, INT_EDGE_RISING, decrement_function);
