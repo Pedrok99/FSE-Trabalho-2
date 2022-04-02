@@ -9,6 +9,8 @@
 #include <socket_tcp.hpp>
 #include <floor_utils.hpp>
 
+#define PACKAGE_MAX_SIZE 1024
+
 using namespace std;
 
 volatile int is_running = true;
@@ -20,19 +22,53 @@ void init_people_counter(int increment_pin, int decrement_pin){
   people_counter(increment_pin, decrement_pin, &inc, &dec);
 }
 
-int main(){
-  dht22 dhtResult;
-  dhtResult.humidity = 0;
-  dhtResult.temperature = 0;
-  
-  vector<component> outputs;
-  outputs = loadResource("outputs", true);
-  cout << "Pela classe"<< "\n\n\n";
+void createAndSendPackage(std::string floorName, std::vector<component> componentVector, int dhtPin, int sock){
+  int leftShift = 2;
+  dht22 dhtData;
+  char separator = ';', s_end = '\0';
+  string package, readData, people_counter, umi_temp;
 
-  JsonFloor testando("groundCfg.json"); 
-  testando.getOutputsComponents();
-  // wiringPiSetup();
-  // init_people_counter(getWPiMappedPin(13), getWPiMappedPin(19));
+  floorName =  "andar:" + floorName + separator;
+
+  while (1)
+  {
+    people_counter = "people_counter:" + to_string(abs(people_on_floor)) + separator;
+    dhtData = readSafeTemperature(dhtPin, dhtData);
+    umi_temp = "temperatura:"+to_string(dhtData.temperature)+ separator +"umidade:" + to_string(dhtData.humidity)+ separator;
+
+    for (auto prop = componentVector.begin(); prop != componentVector.end()-leftShift; ++prop){
+      readData = prop->tag + ":" + to_string(digitalRead(prop->wpi_gpio)) + separator;
+      package = package + readData;
+    }
+
+    package = floorName + package + people_counter + umi_temp + s_end;
+    cout << "Package to send : " << package << endl;
+    cout << "Package size: " << package.size() << endl;
+    
+    sendMsg(sock, (char*)package.c_str(), PACKAGE_MAX_SIZE);
+
+    package.clear();
+    usleep(1000000);
+  }
+  
+}
+
+int main(){
+
+  int socket = initSocket("192.168.0.53", 10057);
+
+  JsonFloor floorInfo("groundCfg.json"); 
+  floorInfo.getOutputsComponents();
+  floorInfo.debug();
+  wiringPiSetup();
+
+  init_people_counter(getWPiMappedPin(13), getWPiMappedPin(19));
+  createAndSendPackage(
+    floorInfo.getFloorName(),
+    floorInfo.getInputsComponents(),
+    floorInfo.getTemperatureSensorComponent().wpi_gpio,
+    socket
+  );
 
   // socket --
   // char *msg = "alow";
@@ -41,17 +77,6 @@ int main(){
   // int socket = initSocket("localhost", 10057);
   // sendMsg(socket, (char*)msg2.c_str(), 4);
   // socket end
-
-  while (is_running)
-  {
-    // dhtResult = readSafeTemperature(getWPiMappedPin(20), dhtResult);
-    // cout << 
-    // "Pessoas -> " << number_on_floor  
-    // << " - Temperature -> " << dhtResult.temperature
-    // << " - Humidity -> " << dhtResult.humidity << endl;
-    
-    usleep(1000000);
-  }
 
   return 0;
 }
