@@ -6,6 +6,7 @@
 #include <thread>
 #include <unistd.h>
 #include <dht22.hpp>
+#include <socket_tcp.hpp>
 
 using namespace std;
 
@@ -25,17 +26,22 @@ int main(){
   
   vector<component> outputs;
   outputs = loadOutputAsArr();
-  wiringPiSetup();
+  // wiringPiSetup();
 
-  init_people_counter(getWPiMappedPin(13), getWPiMappedPin(19));
-
+  // init_people_counter(getWPiMappedPin(13), getWPiMappedPin(19));
+  char *msg = "alow";
+  string msg2 = "alow";
+  cout << msg2.length();
+  int socket = initSocket("localhost", 10057);
   while (is_running)
   {
-    dhtResult = readSafeTemperature(getWPiMappedPin(20), dhtResult);
-    cout << 
-    "Pessoas -> " << number_on_floor  
-    << " - Temperature -> " << dhtResult.temperature
-    << " - Humidity -> " << dhtResult.humidity << endl;
+    sendMsg(socket, (char*)msg2.c_str(), 4);
+    // dhtResult = readSafeTemperature(getWPiMappedPin(20), dhtResult);
+    // cout << 
+    // "Pessoas -> " << number_on_floor  
+    // << " - Temperature -> " << dhtResult.temperature
+    // << " - Humidity -> " << dhtResult.humidity << endl;
+    
     usleep(1000000);
   }
 
