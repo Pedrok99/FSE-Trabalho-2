@@ -6,46 +6,48 @@ from socket_tcp import Server
 
 raw_package = 'estado:Aguardando...'
 
-def update_package():
-  HOST_IP = '192.168.0.53'
-  PORT = 10057
-  global raw_package
-  single_server = Server(HOST_IP, PORT)
+# def update_package():
+#   HOST_IP = '192.168.0.53'
+#   PORT = 10057
+#   global raw_package
+#   single_server = Server(HOST_IP, PORT)
 
-  while True:
-      single_server.wait_connection()
-      while True:
-          decoded_message = single_server.receive(1024)
-          if(not decoded_message):
-              break
-          raw_package = decoded_message
+#   while True:
+#       single_server.wait_connection()
+#       while True:
+#           decoded_message = single_server.receive(1024)
+#           if(not decoded_message):
+#               break
+#           raw_package = decoded_message
 
 
 def init_monitoring():
 
-  listener = Thread(target=update_package)
-  listener.daemon = True  # This thread dies when main thread (only non-daemon thread) exits.
-  listener.start()
+  # listener = Thread(target=update_package)
+  # listener.daemon = True  # This thread dies when main thread (only non-daemon thread) exits.
+  # listener.start()
   def monitoring_screen(screen):
     top_shift = 3;
+    pressed_key = -999;
     init_colors()
     screen.clear()
     screen.refresh()
-    
+    screen.nodelay(True)
     while True:
+      pressed_key = screen.getch()
+
       parsed_package = parse_package(raw_package)
       height, width = screen.getmaxyx()
       title = f"Monitorando: {parsed_package[0][1]}\n\n"
-
       screen.addstr(0, (width//2)-len(title)//2, title, curses.color_pair(1))
       screen.addstr(top_shift, 0, 'Componente', curses.color_pair(5))
       screen.addstr(top_shift, width//2, 'Estado', curses.color_pair(5))
 
+
       for index, pair in enumerate(parsed_package[1:]):
         component = pair[0]
         state = formatValue(pair[1])
-
-        screen.addstr((index*2)+5, 0,  f' {component} ')
+        screen.addstr((index*2)+5, 0,  f'{component}')
         screen.addstr(
           (index*2)+5, 
           (width)//2, 
