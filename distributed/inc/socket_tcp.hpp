@@ -39,11 +39,11 @@ int initSocket(std::string ip, int port){
   }
 
   if (connect(sock, (struct sockaddr*)&server_address, sizeof(server_address)) < 0) {
-    cout << "ERROR: Unable to connect to server" << endl;
+    cout << "ERROR: Não foi possível estabelecer conexão com : "<< ip << ':' << port << endl;
     return -1;
   }
   
-  cout << "Connected to: "<< ip << endl;
+  cout << "Conectado com sucesso a: "<< ip << ':' << port << endl;
 
   return sock;
 }

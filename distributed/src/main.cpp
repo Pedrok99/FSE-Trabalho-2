@@ -22,26 +22,37 @@ void init_people_counter(int increment_pin, int decrement_pin){
   people_counter(increment_pin, decrement_pin, &inc, &dec);
 }
 
-void createAndSendPackage(std::string floorName, std::vector<component> componentVector, int dhtPin, int sock){
+void createAndSendPackages(std::string floorName, std::vector<component> inputComponents, std::vector<component> outputComponents, int dhtPin, int sock){
   int leftShift = 2;
   dht22 dhtData;
-  char separator = ';', s_end = '\0';
-  string package, readData, people_counter, umi_temp;
+  // separators
+  string keyValueSeparator = ":", endSeparator = ";", blockSeparator = "?", s_end = "\0";
+  // package strings
+  string package, readData, people_counter, umi_temp, inputReading, outputReading;
 
-  floorName =  "andar:" + floorName + separator;
 
   while (1)
   {
-    people_counter = "people_counter:" + to_string(abs(people_on_floor)) + separator;
+    people_counter = "Pessoas no andar" + keyValueSeparator + to_string(abs(people_on_floor)) + endSeparator;
     dhtData = readSafeTemperature(dhtPin, dhtData);
-    umi_temp = "temperatura:"+to_string(dhtData.temperature)+ separator +"umidade:" + to_string(dhtData.humidity)+ separator;
+    umi_temp = "Temperatura" + keyValueSeparator + to_string(dhtData.temperature) + endSeparator + 
+               "Umidade"+ keyValueSeparator + to_string(dhtData.humidity) + endSeparator;
 
-    for (auto prop = componentVector.begin(); prop != componentVector.end()-leftShift; ++prop){
-      readData = prop->tag + ":" + to_string(digitalRead(prop->wpi_gpio)) + separator;
-      package = package + readData;
-    }
+    inputReading = returnAllReadAsString(inputComponents, keyValueSeparator, endSeparator, leftShift);
+    outputReading = returnAllReadAsString(outputComponents, keyValueSeparator, endSeparator, 0);
 
-    package = floorName + package + people_counter + umi_temp + s_end;
+    cout << "f------>" << floorName << endl;
+    cout << "o------>" << outputReading << endl;
+    cout << "i------>" << inputReading << endl;
+    cout << "p------>" << people_counter << endl;
+    cout << "u------>" << umi_temp << endl;
+    
+    floorName = "Andar" + keyValueSeparator + floorName + endSeparator;
+    // nome?out?in+count?temp
+    package = floorName + blockSeparator + 
+              outputReading + blockSeparator +
+              inputReading +  people_counter + blockSeparator + 
+              umi_temp + s_end;
     cout << "Package to send : " << package << endl;
     cout << "Package size: " << package.size() << endl;
     
@@ -53,39 +64,35 @@ void createAndSendPackage(std::string floorName, std::vector<component> componen
   
 }
 
-
+int waitConnection(string ip, int port){
+  int svSocket;
+  do{
+    cout << "Tentando estabelecer conexão..." << endl;
+    svSocket = initSocket(ip, port);
+    usleep(3000000);
+  } while (svSocket == -1);
+  return svSocket;
+}
 
 int main(int argc, char *argv[]){
   
   if(argc < 2){
     cout << "\nUm arquivo de configuração deve ser enviado via linha de comando. Saindo...\n" << endl;
-    return 0; 
+    exit(0);
   }
-  cout << "\nArquivo de configuração: " << argv[1] << "\n\n";
+  cout << "\nUsando arquivo de configuração: " << argv[1] << "\n\n";
 
   JsonFloor floorInfo(argv[1]); 
-  floorInfo.getOutputsComponents();
-  floorInfo.debug();
+
+  int svSocket = waitConnection(floorInfo.getCentralIp(), floorInfo.getCentralPort());
+
   vector<component> counterSensors = floorInfo.getPeopleCounterSensors();
-  int socket = initSocket(floorInfo.getCentralIp(), floorInfo.getCentralPort());
 
   wiringPiSetup();
 
   init_people_counter(counterSensors[0].wpi_gpio, counterSensors[1].wpi_gpio);
-  createAndSendPackage(
-    floorInfo.getFloorName(),
-    floorInfo.getInputsComponents(),
-    floorInfo.getTemperatureSensorComponent().wpi_gpio,
-    socket
-  );
 
-  // socket --
-  // char *msg = "alow";
-  // string msg2 = "alow";
-  // cout << msg2.length();
-  // int socket = initSocket("localhost", 10057);
-  // sendMsg(socket, (char*)msg2.c_str(), 4);
-  // socket end
+  createAndSendPackages(floorInfo.getFloorName(), floorInfo.getInputsComponents(), floorInfo.getOutputsComponents(), floorInfo.getTemperatureSensorComponent().wpi_gpio, svSocket);
 
   return 0;
 }
