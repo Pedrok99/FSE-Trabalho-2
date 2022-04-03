@@ -22,5 +22,9 @@ $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 clean:
 	-rm -f $(OBJDIR)/*.o $(EXE)
 
+run-terreo: 
+	./$(BINDIR)/bin configuracao_andar_terreo.json
+
 run: 
-	./$(BINDIR)/bin
+	./$(BINDIR)/bin $(FILENAME)
+

@@ -53,22 +53,31 @@ void createAndSendPackage(std::string floorName, std::vector<component> componen
   
 }
 
-int main(){
+int main(int argc, char *argv[]){
+  
+  if(argc < 2){
+    cout << "\nUm arquivo de configuração deve ser enviado via linha de comando. Saindo...\n" << endl;
+    return 0; 
+  }
+  cout << "\nArquivo de configuração: " << argv[1] << "\n\n";
 
-  int socket = initSocket("192.168.0.53", 10057);
-
-  JsonFloor floorInfo("groundCfg.json"); 
+  JsonFloor floorInfo(argv[1]); 
   floorInfo.getOutputsComponents();
+  cout << floorInfo.getCentralIp() << ":" << floorInfo.getCentralPort() << endl;
   floorInfo.debug();
-  wiringPiSetup();
+  
+  // int socket = initSocket("192.168.0.53", 10057);
 
-  init_people_counter(getWPiMappedPin(13), getWPiMappedPin(19));
-  createAndSendPackage(
-    floorInfo.getFloorName(),
-    floorInfo.getInputsComponents(),
-    floorInfo.getTemperatureSensorComponent().wpi_gpio,
-    socket
-  );
+
+  // wiringPiSetup();
+
+  // init_people_counter(getWPiMappedPin(13), getWPiMappedPin(19));
+  // createAndSendPackage(
+  //   floorInfo.getFloorName(),
+  //   floorInfo.getInputsComponents(),
+  //   floorInfo.getTemperatureSensorComponent().wpi_gpio,
+  //   socket
+  // );
 
   // socket --
   // char *msg = "alow";

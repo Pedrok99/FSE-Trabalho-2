@@ -50,6 +50,14 @@ std::string JsonFloor::getFloorName(){
   return floorName;
 }
 
+std::string JsonFloor::getCentralIp(){
+  return loadedJson["ip_servidor_central"];
+}
+
+int JsonFloor::getCentralPort(){
+  return (int)loadedJson["porta_servidor_central"];
+}
+
 void JsonFloor::debug(){
   cout <<  "=========================================" << endl;
   // debug outputs --------------------------------------------------------------------------------
@@ -74,6 +82,7 @@ void JsonFloor::debug(){
   // end debug ------------------------------------------------------------------------------------
   cout <<  "=========================================" << endl;
 }
+
 JsonFloor::~JsonFloor(){
   cout<< "Adeus :(" << endl;
 }

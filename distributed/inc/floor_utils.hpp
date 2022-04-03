@@ -32,6 +32,8 @@ class JsonFloor{
     std::vector<component> getInputsComponents();
     component getTemperatureSensorComponent();
     std::string getFloorName();
+    std::string getCentralIp();
+    int getCentralPort();
     void debug();
     ~JsonFloor();
 };
