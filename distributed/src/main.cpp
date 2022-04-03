@@ -28,7 +28,7 @@ void createAndSendPackages(std::string floorName, std::vector<component> inputCo
   // separators
   string keyValueSeparator = ":", endSeparator = ";", blockSeparator = "?", s_end = "\0";
   // package strings
-  string package, readData, people_counter, umi_temp, inputReading, outputReading;
+  string package, readData, people_counter, umi_temp, inputReading, outputReading, formattedFloorName;
 
 
   while (1)
@@ -47,15 +47,16 @@ void createAndSendPackages(std::string floorName, std::vector<component> inputCo
     cout << "p------>" << people_counter << endl;
     cout << "u------>" << umi_temp << endl;
     
-    floorName = "Andar" + keyValueSeparator + floorName + endSeparator;
+    formattedFloorName = "Andar" + keyValueSeparator + floorName + endSeparator;
     // nome?out?in+count?temp
-    package = floorName + blockSeparator + 
+    package = formattedFloorName + blockSeparator + 
               outputReading + blockSeparator +
               inputReading +  people_counter + blockSeparator + 
               umi_temp + s_end;
     cout << "Package to send : " << package << endl;
     cout << "Package size: " << package.size() << endl;
     
+    sendMsg(sock, (char*)package.c_str(), package.size());
     // sendMsg(sock, (char*)package.c_str(), PACKAGE_MAX_SIZE);
 
     package.clear();
