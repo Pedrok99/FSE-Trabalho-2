@@ -14,15 +14,23 @@ using namespace std;
 
 void sendMsg(int sock, char* msg, uint32_t msgsize)
 {
-    if (send(sock, msg, msgsize, 0) < 0)
+   try
+      {
+      if (send(sock, msg, msgsize, 0) < 0)
+      {
+        std::cout << "Can't send message." << std::endl;
+        close(sock);
+        return;
+      }
+      std::cout << "Message sent." << std::endl;
+    } catch(const std::exception& e)
     {
-      std::cout << "Can't send message." << std::endl;
-      close(sock);
-      exit(1);
+      cout << "Deu ruim pra mandar a msg" << endl;
     }
-    std::cout << "Message sent." << std::endl;
+
     return;
 }
+
 
 int initSocket(std::string ip, int port){
   int sock;
@@ -50,6 +58,29 @@ int initSocket(std::string ip, int port){
 
 void closeSocket(int sock){
   close(sock);
+}
+
+void getMsg(int sock){
+  char buf[1024];
+
+  while(true) {
+        // clear buffer
+        memset(buf, 0, 1024);
+
+        // wait for a message
+        int bytesRecv = recv(sock, buf, 1024, 0);
+        if (bytesRecv == -1)
+        {
+            std::cerr << "There was a connection issue." << std::endl;
+        }
+        if (bytesRecv == 0)
+        {
+            std::cout << "The client disconnected" << std::endl;
+        }
+        // display message
+        std::cout << "Received: " << std::string(buf, 0, bytesRecv);
+
+    }
 }
 
 #endif

@@ -20,7 +20,6 @@ def update_package():
           if(not decoded_message):
             print("No message recieved")
             break
-          print('comeco da msg', decoded_message, 'fim da msg')
           raw_package = decoded_message
 
 

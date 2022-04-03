@@ -55,8 +55,11 @@ void createAndSendPackages(std::string floorName, std::vector<component> inputCo
               umi_temp + s_end;
     cout << "Package to send : " << package << endl;
     cout << "Package size: " << package.size() << endl;
-    
+   
     sendMsg(sock, (char*)package.c_str(), package.size());
+
+    
+    
     // sendMsg(sock, (char*)package.c_str(), PACKAGE_MAX_SIZE);
 
     package.clear();
@@ -92,7 +95,7 @@ int main(int argc, char *argv[]){
   wiringPiSetup();
 
   init_people_counter(counterSensors[0].wpi_gpio, counterSensors[1].wpi_gpio);
-
+  cout << floorInfo.getTemperatureSensorComponent().wpi_gpio;
   createAndSendPackages(floorInfo.getFloorName(), floorInfo.getInputsComponents(), floorInfo.getOutputsComponents(), floorInfo.getTemperatureSensorComponent().wpi_gpio, svSocket);
 
   return 0;
