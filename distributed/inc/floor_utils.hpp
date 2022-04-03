@@ -30,6 +30,7 @@ class JsonFloor{
     JsonFloor(std::string jsonFileName);
     std::vector<component> getOutputsComponents();
     std::vector<component> getInputsComponents();
+    std::vector<component> getPeopleCounterSensors();
     component getTemperatureSensorComponent();
     std::string getFloorName();
     std::string getCentralIp();

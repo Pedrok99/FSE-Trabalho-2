@@ -58,6 +58,24 @@ int JsonFloor::getCentralPort(){
   return (int)loadedJson["porta_servidor_central"];
 }
 
+
+std::vector<component> JsonFloor::getPeopleCounterSensors(){
+  std::vector<component> sensors;
+
+  for (auto& element : inputsComponents) {
+    if(element.type == "contagem"){
+      sensors.push_back(element);
+    }
+  }
+
+  for (auto& element : sensors) {
+    cout << "Sensor encontrado! -> " << element.tag << endl;
+  }
+  
+  return sensors;
+
+}
+
 void JsonFloor::debug(){
   cout <<  "=========================================" << endl;
   // debug outputs --------------------------------------------------------------------------------

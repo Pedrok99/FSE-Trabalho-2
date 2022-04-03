@@ -45,13 +45,15 @@ void createAndSendPackage(std::string floorName, std::vector<component> componen
     cout << "Package to send : " << package << endl;
     cout << "Package size: " << package.size() << endl;
     
-    sendMsg(sock, (char*)package.c_str(), PACKAGE_MAX_SIZE);
+    // sendMsg(sock, (char*)package.c_str(), PACKAGE_MAX_SIZE);
 
     package.clear();
     usleep(1000000);
   }
   
 }
+
+
 
 int main(int argc, char *argv[]){
   
@@ -63,21 +65,19 @@ int main(int argc, char *argv[]){
 
   JsonFloor floorInfo(argv[1]); 
   floorInfo.getOutputsComponents();
-  cout << floorInfo.getCentralIp() << ":" << floorInfo.getCentralPort() << endl;
   floorInfo.debug();
-  
-  // int socket = initSocket("192.168.0.53", 10057);
+  vector<component> counterSensors = floorInfo.getPeopleCounterSensors();
+  int socket = initSocket(floorInfo.getCentralIp(), floorInfo.getCentralPort());
 
+  wiringPiSetup();
 
-  // wiringPiSetup();
-
-  // init_people_counter(getWPiMappedPin(13), getWPiMappedPin(19));
-  // createAndSendPackage(
-  //   floorInfo.getFloorName(),
-  //   floorInfo.getInputsComponents(),
-  //   floorInfo.getTemperatureSensorComponent().wpi_gpio,
-  //   socket
-  // );
+  init_people_counter(counterSensors[0].wpi_gpio, counterSensors[1].wpi_gpio);
+  createAndSendPackage(
+    floorInfo.getFloorName(),
+    floorInfo.getInputsComponents(),
+    floorInfo.getTemperatureSensorComponent().wpi_gpio,
+    socket
+  );
 
   // socket --
   // char *msg = "alow";
