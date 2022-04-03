@@ -61,24 +61,26 @@ void closeSocket(int sock){
 }
 
 void getMsg(int sock){
+  int bufferSize = 1024;
   char buf[1024];
-
   while(true) {
         // clear buffer
-        memset(buf, 0, 1024);
-
+        memset(buf, 0, bufferSize);
+        cout << "Aguardando mensagem ?" << endl;
         // wait for a message
-        int bytesRecv = recv(sock, buf, 1024, 0);
+        int bytesRecv = recv(sock, buf, bufferSize, 0);
         if (bytesRecv == -1)
         {
             std::cerr << "There was a connection issue." << std::endl;
+            return;
         }
         if (bytesRecv == 0)
         {
-            std::cout << "The client disconnected" << std::endl;
+            // std::cout << "The client disconnected" << std::endl;
+            return;
         }
         // display message
-        std::cout << "Received: " << std::string(buf, 0, bytesRecv);
+        std::cout << "Received: " << std::string(buf, 0, bytesRecv) << endl;
 
     }
 }

@@ -20,6 +20,9 @@ class Server():
   def __del__(self):
     self.s.close()
 
+  def getConn(self):
+    return self.conn
+
   # def send(self, message):
   #   message_size = str(len(message)).ljust(self.__size_message_length).encode()
   #   self.conn.sendall(message_size)  # Send length of msg (in known size, 16)
@@ -31,12 +34,3 @@ class Server():
       print('No message recieved')
       return False
     return message.decode(encoding='utf_8', errors='replace')
-
-  # def __receive_value(self, conn, buf_lentgh):
-  #   buf = b''
-  #   while buf_lentgh:
-  #     newbuf = conn.recv(buf_lentgh)
-  #     # if not newbuf: return None
-  #     buf += newbuf
-  #     buf_lentgh -= len(newbuf)
-  #   return buf.decode()

@@ -86,17 +86,37 @@ int main(int argc, char *argv[]){
   }
   cout << "\nUsando arquivo de configuração: " << argv[1] << "\n\n";
 
-  JsonFloor floorInfo(argv[1]); 
+  JsonFloor floorInfo(argv[1]);
 
-  int svSocket = waitConnection(floorInfo.getCentralIp(), floorInfo.getCentralPort());
 
-  vector<component> counterSensors = floorInfo.getPeopleCounterSensors();
 
-  wiringPiSetup();
 
-  init_people_counter(counterSensors[0].wpi_gpio, counterSensors[1].wpi_gpio);
-  cout << floorInfo.getTemperatureSensorComponent().wpi_gpio;
-  createAndSendPackages(floorInfo.getFloorName(), floorInfo.getInputsComponents(), floorInfo.getOutputsComponents(), floorInfo.getTemperatureSensorComponent().wpi_gpio, svSocket);
+
+
+// removelater
+  int svSocket = waitConnection("localhost", floorInfo.getCentralPort());
+  cout << "Acima da thread" << endl;
+  std::thread recieve (getMsg, svSocket);   
+   
+  recieve.join();
+  cout << "Abaixo da thread" << endl;
+
+// removelater
+
+
+
+
+
+
+  // int svSocket = waitConnection(floorInfo.getCentralIp(), floorInfo.getCentralPort());
+
+  // vector<component> counterSensors = floorInfo.getPeopleCounterSensors();
+
+  // wiringPiSetup();
+
+  // init_people_counter(counterSensors[0].wpi_gpio, counterSensors[1].wpi_gpio);
+  // cout << floorInfo.getTemperatureSensorComponent().wpi_gpio;
+  // createAndSendPackages(floorInfo.getFloorName(), floorInfo.getInputsComponents(), floorInfo.getOutputsComponents(), floorInfo.getTemperatureSensorComponent().wpi_gpio, svSocket);
 
   return 0;
 }
