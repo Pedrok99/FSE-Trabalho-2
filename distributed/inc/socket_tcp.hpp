@@ -9,6 +9,7 @@
 #include <string>
 #include <string.h>
 #include <iostream>
+#include <gpio.hpp>
 
 using namespace std;
 
@@ -60,29 +61,29 @@ void closeSocket(int sock){
   close(sock);
 }
 
-void getMsg(int sock){
+string getMsg(int sock){
   int bufferSize = 1024;
+  string recievedString;
   char buf[1024];
-  while(true) {
-        // clear buffer
-        memset(buf, 0, bufferSize);
-        cout << "Aguardando mensagem ?" << endl;
-        // wait for a message
-        int bytesRecv = recv(sock, buf, bufferSize, 0);
-        if (bytesRecv == -1)
-        {
-            std::cerr << "There was a connection issue." << std::endl;
-            return;
-        }
-        if (bytesRecv == 0)
-        {
-            // std::cout << "The client disconnected" << std::endl;
-            return;
-        }
-        // display message
-        std::cout << "Received: " << std::string(buf, 0, bytesRecv) << endl;
 
-    }
+  memset(buf, 0, bufferSize);
+  cout << "Aguardando mensagem ?" << endl;
+  // wait for a message
+  int bytesRecv = recv(sock, buf, bufferSize, 0);
+  if (bytesRecv == -1)
+  {
+      std::cerr << "There was a connection issue." << std::endl;
+      return "0=0";
+  }
+  if (bytesRecv == 0)
+  {
+      // std::cout << "The client disconnected" << std::endl;
+      return "0=0";
+  }
+  // display message
+  recievedString = std::string(buf, 0, bytesRecv);
+  return recievedString;
+  
 }
 
 #endif

@@ -78,6 +78,23 @@ int waitConnection(string ip, int port){
   return svSocket;
 }
 
+void handleEventRequest(int sock){
+  while (true)
+  {
+    string recievedString, delimiter="=", target, value;
+
+    recievedString = getMsg(sock);
+
+    target= recievedString.substr(0, recievedString.find(delimiter)); 
+    value = recievedString.erase(0, recievedString.find(delimiter) + delimiter.length());
+    cout << "Chave: " << target << endl;
+    cout << "Valor: " << value << endl;
+
+    setPinValue(getWPiMappedPin(stoi(target)), stoi(value));
+  }
+
+}
+
 int main(int argc, char *argv[]){
   
   if(argc < 2){
@@ -93,15 +110,7 @@ int main(int argc, char *argv[]){
 
 
 
-// removelater
-  int svSocket = waitConnection("localhost", floorInfo.getCentralPort());
-  cout << "Acima da thread" << endl;
-  std::thread recieve (getMsg, svSocket);   
-   
-  recieve.join();
-  cout << "Abaixo da thread" << endl;
 
-// removelater
 
 
 
@@ -112,7 +121,19 @@ int main(int argc, char *argv[]){
 
   // vector<component> counterSensors = floorInfo.getPeopleCounterSensors();
 
-  // wiringPiSetup();
+   wiringPiSetup();
+
+
+// removelater
+  int svSocket = waitConnection(floorInfo.getCentralIp(), floorInfo.getCentralPort());
+  cout << "Acima da thread" << endl;
+  std::thread recieve (handleEventRequest, svSocket);   
+   
+  recieve.join();
+  cout << "Abaixo da thread" << endl;
+
+// removelater
+
 
   // init_people_counter(counterSensors[0].wpi_gpio, counterSensors[1].wpi_gpio);
   // cout << floorInfo.getTemperatureSensorComponent().wpi_gpio;

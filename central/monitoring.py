@@ -5,7 +5,7 @@ from threading import Thread
 from socket_tcp import Server
 
 raw_package = 'Andar:Térreo;?Lâmpada da Sala T01:0;Lâmpada da Sala T02:1;Lâmpadas do Corredor Terreo:0;Ar-Condicionado Terreo:0;Aspersor de Água (Incêndio):1;?Sensor de Presença:0;Sensor de Fumaça:0;Sensor de Janela T01:1;Sensor de Janela T02:1;Sensor de Porta Entrada:1;Pessoas no andar:10;?Temperatura:28.799999;Umidade:39.500000;'
-raw_package = 'Andar:Aguardando...;???Temperatura:0;Umidade:0;'
+#raw_package = 'Andar:Aguardando...;???Temperatura:0;Umidade:0;'
 
 def update_package():
   HOST_IP = '192.168.0.53'
@@ -24,13 +24,14 @@ def update_package():
 
 
 def init_monitoring():
+  initialKey = 48
   listener = Thread(target=update_package)
   listener.daemon = True  # This thread dies when main thread (only non-daemon thread) exits.
   listener.start()
   col_size_div = 4
   def monitoring_screen(screen):
     top_shift = 3;
-    pressed_key = -999;
+    pressed_key = 0;
     init_colors()
     screen.clear()
     screen.refresh()
@@ -67,19 +68,26 @@ def init_monitoring():
         )
 
       #input headers
-      screen.addstr(top_shift, width-int(width*0.5), 'Componente (inputs)', curses.color_pair(5))
-      screen.addstr(top_shift, width-int(width*0.25), 'Estado', curses.color_pair(5))
+      screen.addstr(top_shift, width-int(width*0.6), 'Componente (inputs)', curses.color_pair(5))
+      screen.addstr(top_shift, width-int(width*0.3), 'Estado', curses.color_pair(5))
+      screen.addstr(top_shift, width-len('Tecla Liga/Desliga'), 'Tecla Liga/Desliga', curses.color_pair(5))
       #create input components
       for index, pair in enumerate(inputComponents):
         component = pair[0]
         state = formatValue(pair[1])
-        screen.addstr((index*2)+5,  width-int(width*0.5),  f'{component}')
+        screen.addstr((index*2)+5,  width-int(width*0.6),  f'{component}')
         screen.addstr(
           (index*2)+5, 
-          width-int(width*0.25), 
+          width-int(width*0.3), 
           f' {state} \n', 
           curses.color_pair(2) if state == 'Ligado' else 
           (curses.color_pair(3) if state == 'Desligado' else curses.color_pair(4))
+        )
+        screen.addstr(
+          (index*2)+5, 
+          width-len(str(initialKey))*5, 
+          f' {chr(initialKey+index)} \n', 
+          curses.color_pair(4) if pressed_key != initialKey+index else curses.color_pair(2)
         )
 
       screen.refresh()
