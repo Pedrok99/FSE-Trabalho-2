@@ -2,7 +2,7 @@ import re
 
 def parse(str_to_parse):
   tempArr = []
-  parsed = re.findall("[\wÀ-ú\d .]+:[\wÀ-ú\d .]+", str_to_parse)
+  parsed = re.findall("[\wÀ-ú\d .\-\(\)#]+:[\wÀ-ú\d .]+", str_to_parse)
   for str in parsed:
     key, value = str.split(sep=":")
     tempArr.append((key, value))

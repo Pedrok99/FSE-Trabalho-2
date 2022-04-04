@@ -4,13 +4,16 @@ from package_parser import parse_package
 from threading import Thread
 from socket_tcp import Server
 
-raw_package = 'Andar:Térreo;?Lâmpada da Sala T01:0;Lâmpada da Sala T02:1;Lâmpadas do Corredor Terreo:0;Ar-Condicionado Terreo:0;Aspersor de Água (Incêndio):1;?Sensor de Presença:0;Sensor de Fumaça:0;Sensor de Janela T01:1;Sensor de Janela T02:1;Sensor de Porta Entrada:1;Pessoas no andar:10;?Temperatura:28.799999;Umidade:39.500000;'
+raw_package = 'Andar:Térreo;?Lâmpada da Sala T01#7:1;Lâmpada da Sala T02#0:1;Lâmpadas do Corredor Terreo#2:1;Ar-Condicionado Terreo#11:1;Aspersor de Água (Incêndio)#27:1;?Sensor de Presença#25:0;Sensor de Fumaça#4:0;Sensor de Janela T01#13:0;Sensor de Janela T02#14:0;Sensor de Porta Entrada#12:0;Pessoas no andar:3;?Temperatura:27.100000;Umidade:49.000000;'
 #raw_package = 'Andar:Aguardando...;???Temperatura:0;Umidade:0;'
+pressed_key = 0
+event_queue=[]
 
 def update_package():
   HOST_IP = '192.168.0.53'
   PORT = 10057
   global raw_package
+  global event_queue
   single_server = Server(HOST_IP, PORT)
 
   while True:
@@ -21,6 +24,19 @@ def update_package():
             print("No message recieved")
             break
           raw_package = decoded_message
+          if(len(event_queue)>0):
+            event = event_queue.pop(0)
+            single_server.getConn().sendall(event.encode())
+
+def handle_key_press(input_components):
+  global pressed_key
+  global event_queue
+  if(pressed_key >= 48 and pressed_key < (48+len(input_components))):
+    choice = chr(pressed_key)
+    if(choice.isdigit()):
+      _, gpio = input_components[int(choice)][0].split("#")
+      # print("Escolha: ", input_components[int(choice)], gpio, input_components[int(choice)][1])
+      event_queue.append(f'{gpio}={0 if int(input_components[int(choice)][1]) == 1 else 1}')
 
 
 def init_monitoring():
@@ -29,9 +45,10 @@ def init_monitoring():
   listener.daemon = True  # This thread dies when main thread (only non-daemon thread) exits.
   listener.start()
   col_size_div = 4
+  global pressed_key
   def monitoring_screen(screen):
     top_shift = 3;
-    pressed_key = 0;
+    global pressed_key
     init_colors()
     screen.clear()
     screen.refresh()
@@ -90,6 +107,7 @@ def init_monitoring():
           curses.color_pair(4) if pressed_key != initialKey+index else curses.color_pair(2)
         )
 
+      handle_key_press(inputComponents)
       screen.refresh()
       sleep(1)
       screen.clear()

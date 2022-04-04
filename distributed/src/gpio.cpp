@@ -22,7 +22,7 @@ void setPinValue(int pin, int value){
 string returnAllReadAsString(vector<component> sensors, string keyValueSeparator, string endSeparator, int leftShift){
   string readData, aux;
   for (auto prop = sensors.begin(); prop != sensors.end()-leftShift; ++prop){
-    aux = prop->tag + keyValueSeparator + readPinAsStr(prop->wpi_gpio) + endSeparator;
+    aux = prop->tag + "#" + to_string(prop->wpi_gpio) + keyValueSeparator + readPinAsStr(prop->wpi_gpio) + endSeparator;
     readData += aux;
   }
   return readData;

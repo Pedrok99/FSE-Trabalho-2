@@ -90,7 +90,7 @@ void handleEventRequest(int sock){
     cout << "Chave: " << target << endl;
     cout << "Valor: " << value << endl;
 
-    setPinValue(getWPiMappedPin(stoi(target)), stoi(value));
+    setPinValue(stoi(target), stoi(value));
   }
 
 }
@@ -117,27 +117,26 @@ int main(int argc, char *argv[]){
 
 
 
-  // int svSocket = waitConnection(floorInfo.getCentralIp(), floorInfo.getCentralPort());
+  int svSocket = waitConnection(floorInfo.getCentralIp(), floorInfo.getCentralPort());
 
-  // vector<component> counterSensors = floorInfo.getPeopleCounterSensors();
+  vector<component> counterSensors = floorInfo.getPeopleCounterSensors();
 
    wiringPiSetup();
 
 
 // removelater
-  int svSocket = waitConnection(floorInfo.getCentralIp(), floorInfo.getCentralPort());
+
   cout << "Acima da thread" << endl;
   std::thread recieve (handleEventRequest, svSocket);   
    
-  recieve.join();
+
   cout << "Abaixo da thread" << endl;
 
 // removelater
 
-
-  // init_people_counter(counterSensors[0].wpi_gpio, counterSensors[1].wpi_gpio);
-  // cout << floorInfo.getTemperatureSensorComponent().wpi_gpio;
-  // createAndSendPackages(floorInfo.getFloorName(), floorInfo.getInputsComponents(), floorInfo.getOutputsComponents(), floorInfo.getTemperatureSensorComponent().wpi_gpio, svSocket);
-
+  init_people_counter(counterSensors[0].wpi_gpio, counterSensors[1].wpi_gpio);
+  cout << floorInfo.getTemperatureSensorComponent().wpi_gpio;
+  createAndSendPackages(floorInfo.getFloorName(), floorInfo.getInputsComponents(), floorInfo.getOutputsComponents(), floorInfo.getTemperatureSensorComponent().wpi_gpio, svSocket);
+  recieve.join();
   return 0;
 }

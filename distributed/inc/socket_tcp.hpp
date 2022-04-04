@@ -78,6 +78,7 @@ string getMsg(int sock){
   if (bytesRecv == 0)
   {
       // std::cout << "The client disconnected" << std::endl;
+      sleep(1);
       return "0=0";
   }
   // display message
