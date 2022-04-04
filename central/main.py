@@ -12,13 +12,4 @@ HOST_IP = '192.168.0.53'
 
 init_monitoring()
 
-# single_server = Server(HOST_IP, PORT)
-
-# while True:
-#     single_server.wait_connection()
-#     single_server.getConn().sendall("7=1".encode())
-
-#     while True:
-#       print("Message sent")
-#       single_server.getConn().sendall("pin:value;".encode())
-#       sleep(2)
+#todo: multiple tcp conn

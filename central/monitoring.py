@@ -4,7 +4,7 @@ from package_parser import parse_package
 from threading import Thread
 from socket_tcp import Server
 
-raw_package = 'Andar:Térreo;?Lâmpada da Sala T01#7:1;Lâmpada da Sala T02#0:1;Lâmpadas do Corredor Terreo#2:1;Ar-Condicionado Terreo#11:1;Aspersor de Água (Incêndio)#27:1;?Sensor de Presença#25:0;Sensor de Fumaça#4:0;Sensor de Janela T01#13:0;Sensor de Janela T02#14:0;Sensor de Porta Entrada#12:0;Pessoas no andar:3;?Temperatura:27.100000;Umidade:49.000000;'
+raw_package = 'Andar:Térreo;?Lâmpada da Sala T01#7:1;Lâmpada da Sala T02#0:1;Lâmpadas do Corredor Terreo#2:1;Ar-Condicionado Terreo#11:1;Aspersor de Água (Incêndio)#27:1;?Sensor de Presença#25:0;Sensor de Fumaça#4:1;Sensor de Janela T01#13:0;Sensor de Janela T02#14:0;Sensor de Porta Entrada#12:0;Pessoas no andar:3;?Temperatura:27.100000;Umidade:49.000000;'
 #raw_package = 'Andar:Aguardando...;???Temperatura:0;Umidade:0;'
 pressed_key = 0
 event_queue=[]
@@ -28,16 +28,31 @@ def update_package():
             event = event_queue.pop(0)
             single_server.getConn().sendall(event.encode())
 
-def handle_key_press(input_components):
+def handle_events(outputComponents, inputComponents, fire_alarm, fire_detected):
   global pressed_key
   global event_queue
-  if(pressed_key >= 48 and pressed_key < (48+len(input_components))):
+  if(pressed_key >= 48 and pressed_key < (48+len(outputComponents))):
     choice = chr(pressed_key)
     if(choice.isdigit()):
-      _, gpio = input_components[int(choice)][0].split("#")
-      # print("Escolha: ", input_components[int(choice)], gpio, input_components[int(choice)][1])
-      event_queue.append(f'{gpio}={0 if int(input_components[int(choice)][1]) == 1 else 1}')
+      _, gpio = outputComponents[int(choice)][0].split("#")
+      # print("Escolha: ", outputComponents[int(choice)], gpio, input_components[int(choice)][1])
+      event_queue.append(f'{gpio}={0 if int(outputComponents[int(choice)][1]) == 1 else 1}')
+  if (pressed_key == 97):
+    fire_alarm = 0 if fire_alarm == 1 else 1
 
+  if(fire_alarm and int(inputComponents[1][1])==1):
+    fire_detected = 1
+
+    if(outputComponents[-1][0].find("persor")!= -1):
+      _, gpio = outputComponents[-1][0].split("#")
+      event_queue.append(f'{gpio}=1')
+  else:
+    fire_detected = 0
+
+
+  
+ 
+  return fire_alarm, fire_detected
 
 def init_monitoring():
   initialKey = 48
@@ -48,6 +63,9 @@ def init_monitoring():
   global pressed_key
   def monitoring_screen(screen):
     top_shift = 3;
+    fire_alarm = 0
+    fire_detected = 0
+
     global pressed_key
     init_colors()
     screen.clear()
@@ -56,7 +74,7 @@ def init_monitoring():
     while True:
       pressed_key = screen.getch()
 
-      floorName, inputComponents, outputComponents, temp_umi = parse_package(raw_package)
+      floorName, outputComponents, inputComponents, temp_umi = parse_package(raw_package)
       height, width = screen.getmaxyx()
 
       # title
@@ -69,10 +87,10 @@ def init_monitoring():
       screen.addstr(0, width-len(humidity), humidity, curses.color_pair(7))
 
       #output headers
-      screen.addstr(top_shift, width-int(width*1), 'Componente (outputs)', curses.color_pair(5))
+      screen.addstr(top_shift, width-int(width*1), 'Componente (inputs)', curses.color_pair(5))
       screen.addstr(top_shift, width-int(width*0.75), 'Estado', curses.color_pair(5))
       #create output components
-      for index, pair in enumerate(outputComponents):
+      for index, pair in enumerate(inputComponents):
         component = pair[0]
         state = formatValue(pair[1])
         screen.addstr((index*2)+5, 0,  f'{component}')
@@ -85,11 +103,11 @@ def init_monitoring():
         )
 
       #input headers
-      screen.addstr(top_shift, width-int(width*0.6), 'Componente (inputs)', curses.color_pair(5))
+      screen.addstr(top_shift, width-int(width*0.6), 'Componente (outputs)', curses.color_pair(5))
       screen.addstr(top_shift, width-int(width*0.3), 'Estado', curses.color_pair(5))
       screen.addstr(top_shift, width-len('Tecla Liga/Desliga'), 'Tecla Liga/Desliga', curses.color_pair(5))
       #create input components
-      for index, pair in enumerate(inputComponents):
+      for index, pair in enumerate(outputComponents):
         component = pair[0]
         state = formatValue(pair[1])
         screen.addstr((index*2)+5,  width-int(width*0.6),  f'{component}')
@@ -106,10 +124,26 @@ def init_monitoring():
           f' {chr(initialKey+index)} \n', 
           curses.color_pair(4) if pressed_key != initialKey+index else curses.color_pair(2)
         )
+      alarm_state = formatValue(fire_alarm)
 
-      handle_key_press(inputComponents)
+      screen.addstr(height-int(height*0.05), 0, f'Tecla:a - Alarme de incêndio: {alarm_state} ', 
+        curses.color_pair(2) if alarm_state == 'Ligado' else 
+        (curses.color_pair(3) if alarm_state == 'Desligado' else curses.color_pair(4))
+      )
+
+      fire_alert_title = ' INCÊNDIO DETECTADO!! '
+      if(fire_detected):
+        screen.addstr(height-int(height*0.05), width-(len(fire_alert_title)+1), fire_alert_title, curses.color_pair(3))
+      
+      fire_alarm, fire_detected = handle_events(outputComponents, inputComponents, fire_alarm, fire_detected)
       screen.refresh()
-      sleep(1)
+      sleep(0.5)
+
+      if(fire_detected):
+        screen.addstr(height-int(height*0.05), width-(len(fire_alert_title)+1), fire_alert_title, curses.color_pair(8))
+
+      screen.refresh()
+      sleep(0.5)
       screen.clear()
 
   curses.wrapper(monitoring_screen)
@@ -123,6 +157,8 @@ def init_colors():
   curses.init_pair(5, curses.COLOR_MAGENTA , curses.COLOR_BLACK) # header
   curses.init_pair(6, curses.COLOR_YELLOW , curses.COLOR_BLACK) # temp
   curses.init_pair(7, curses.COLOR_BLUE , curses.COLOR_BLACK) # humidity
+  curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_YELLOW) # warn
+
 
 
 def formatValue(value):
