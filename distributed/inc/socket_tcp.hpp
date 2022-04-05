@@ -67,7 +67,7 @@ string getMsg(int sock){
   char buf[1024];
 
   memset(buf, 0, bufferSize);
-  cout << "Aguardando mensagem ?" << endl;
+  cout << "Aguardando próxima mensagem." << endl;
   // wait for a message
   int bytesRecv = recv(sock, buf, bufferSize, 0);
   if (bytesRecv == -1)

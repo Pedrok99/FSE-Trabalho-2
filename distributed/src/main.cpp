@@ -40,12 +40,6 @@ void createAndSendPackages(std::string floorName, std::vector<component> inputCo
 
     inputReading = returnAllReadAsString(inputComponents, keyValueSeparator, endSeparator, leftShift);
     outputReading = returnAllReadAsString(outputComponents, keyValueSeparator, endSeparator, 0);
-
-    cout << "f------>" << floorName << endl;
-    cout << "o------>" << outputReading << endl;
-    cout << "i------>" << inputReading << endl;
-    cout << "p------>" << people_counter << endl;
-    cout << "u------>" << umi_temp << endl;
     
     formattedFloorName = "Andar" + keyValueSeparator + floorName + endSeparator;
     // nome?out?in+count?temp
@@ -53,15 +47,9 @@ void createAndSendPackages(std::string floorName, std::vector<component> inputCo
               outputReading + blockSeparator +
               inputReading +  people_counter + blockSeparator + 
               umi_temp + s_end;
-    cout << "Package to send : " << package << endl;
-    cout << "Package size: " << package.size() << endl;
-   
+    cout << "Sending package... " << endl;
     sendMsg(sock, (char*)package.c_str(), package.size());
-
-    
-    
-    // sendMsg(sock, (char*)package.c_str(), PACKAGE_MAX_SIZE);
-
+    cout << "Package size: " << package.size() << endl;
     package.clear();
     usleep(1000000);
   }
@@ -105,34 +93,13 @@ int main(int argc, char *argv[]){
 
   JsonFloor floorInfo(argv[1]);
 
-
-
-
-
-
-
-
-
-
-
-
-
   int svSocket = waitConnection(floorInfo.getCentralIp(), floorInfo.getCentralPort());
 
   vector<component> counterSensors = floorInfo.getPeopleCounterSensors();
 
-   wiringPiSetup();
+  wiringPiSetup();
 
-
-// removelater
-
-  cout << "Acima da thread" << endl;
   std::thread recieve (handleEventRequest, svSocket);   
-   
-
-  cout << "Abaixo da thread" << endl;
-
-// removelater
 
   init_people_counter(counterSensors[0].wpi_gpio, counterSensors[1].wpi_gpio);
   cout << floorInfo.getTemperatureSensorComponent().wpi_gpio;
