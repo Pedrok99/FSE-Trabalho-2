@@ -12,24 +12,32 @@ Com os arquivos já na rasp, utilize o seguinte comando para servidores distribu
 #### __Compilar__
 Para compilar, na raiz do projeto, utilize o seguinte comando:
  
-##### `make`
+
+```
+make
+```
  
 #### __Executar__:
 
 Para executar, utilize o seguinte comando: <br/>
 
 __Andar térreo:__
-* ##### `make run-terreo`
-
+```
+make run-terreo
+```
 __Andar 1:__
-* ##### `make run-a1`
+```
+make run-a1
+```
 
 ### __2 - Central:__
 #### __Executar__:
 
 Para executar, utilize o seguinte comando: <br/>
 
-* ##### `python3 main.py`
+```
+python3 main.py
+```
 
 ## ScreenShots
 #### Térreo
