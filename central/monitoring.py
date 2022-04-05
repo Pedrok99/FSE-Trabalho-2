@@ -4,8 +4,8 @@ from package_parser import parse_package
 from threading import Thread
 from socket_tcp import Server
 
-raw_package = 'Andar:Térreo;?Lâmpada da Sala T01#7:1;Lâmpada da Sala T02#0:1;Lâmpadas do Corredor Terreo#2:1;Ar-Condicionado Terreo#11:1;Aspersor de Água (Incêndio)#27:1;?Sensor de Presença#25:0;Sensor de Fumaça#4:1;Sensor de Janela T01#13:0;Sensor de Janela T02#14:0;Sensor de Porta Entrada#12:0;Pessoas no andar:3;?Temperatura:27.100000;Umidade:49.000000;'
-#raw_package = 'Andar:Aguardando...;???Temperatura:0;Umidade:0;'
+#raw_package = 'Andar:Térreo;?Lâmpada da Sala T01#7:1;Lâmpada da Sala T02#0:1;Lâmpadas do Corredor Terreo#2:1;Ar-Condicionado Terreo#11:1;Aspersor de Água (Incêndio)#27:1;?Sensor de Presença#25:0;Sensor de Fumaça#4:1;Sensor de Janela T01#13:0;Sensor de Janela T02#14:0;Sensor de Porta Entrada#12:0;Pessoas no andar:3;?Temperatura:27.100000;Umidade:49.000000;'
+raw_package = 'Andar:Aguardando...;???Temperatura:0;Umidade:0;'
 pressed_key = 0
 event_queue=[]
 
@@ -41,11 +41,11 @@ def handle_events(outputComponents, inputComponents, fire_alarm, fire_detected):
     fire_alarm = 0 if fire_alarm == 1 else 1
 
   if(fire_alarm and int(inputComponents[1][1])==1):
-    fire_detected = 1
 
-    if(outputComponents[-1][0].find("persor")!= -1):
+    if(outputComponents[-1][0].find("persor")!= -1 and not fire_detected):
       _, gpio = outputComponents[-1][0].split("#")
       event_queue.append(f'{gpio}=1')
+    fire_detected = 1
   else:
     fire_detected = 0
 

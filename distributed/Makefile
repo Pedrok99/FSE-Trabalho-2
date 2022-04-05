@@ -25,6 +25,9 @@ clean:
 run-terreo: 
 	./$(BINDIR)/bin configuracao_andar_terreo.json
 
+run-a1: 
+	./$(BINDIR)/bin configuracao_andar_1.json
+
 run: 
 	./$(BINDIR)/bin $(FILENAME)
 
